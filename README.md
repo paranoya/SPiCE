@@ -18,7 +18,7 @@ se puede volver a un punto concreto del pasado con
 
 # Para cambiar de rama 
 
-git checkout nombre_de_la_rama
+`git checkout <nombre_de_la_rama>`
 
 Para poder ver las ramas hay que hacer como minimo un checkout
 
