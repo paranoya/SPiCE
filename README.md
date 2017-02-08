@@ -16,7 +16,7 @@ If you write
 
 `git reset --hard <numero SHA>`
 
-# Para cambiar de rama 
+# If you want to change between branches
 
 git checkout nombre_de_la_rama
 
