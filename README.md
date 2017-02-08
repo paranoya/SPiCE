@@ -7,3 +7,9 @@ Hello, world ;^D
 git reset -- hard
 
 Careful! It overwrites your local files!
+
+# Para cambiar de rama 
+
+git checkout nombre_de_la_rama
+
+Para poder ver las ramas hay que hacer como minimo un checkout
