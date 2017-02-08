@@ -1,10 +1,6 @@
-'''
-Created on Feb 8, 2017
 
-@author: vital
 import numpy as np
 
-'''
 print 'How are you doing?'
 
 print 'Vamos git!!'
