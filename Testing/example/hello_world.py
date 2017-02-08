@@ -9,5 +9,5 @@ print 'How are you doing?'
 
 print 'Vamos git!!'
 
-print 'movidas chungas'
+print 'stranger things = movidas chungas'
 
