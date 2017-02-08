@@ -5,3 +5,5 @@ Hello, world ;^D
 # Para Forzar el pull en caso de conflicto
 
 git reset -- hard
+
+Careful! It overwrites your local files!
