@@ -2,3 +2,6 @@
 
 Hello, world ;^D
 
+# Para Forzar el pull en caso de conflicto
+
+git reset -- hard
