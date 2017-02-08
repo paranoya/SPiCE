@@ -16,5 +16,11 @@ se puede volver a un punto concreto del pasado con
 
 `git reset --hard <numero SHA>`
 
+# Para cambiar de rama 
+
+git checkout nombre_de_la_rama
+
+Para poder ver las ramas hay que hacer como minimo un checkout
+
 ---
 
