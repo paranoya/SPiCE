@@ -9,6 +9,4 @@ print 'How are you doing?'
 
 print 'fine thanks'
 
-print 'Testing spice project'
-
 print 'Hello world again'
