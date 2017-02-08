@@ -2,17 +2,17 @@
 
 Hello, world ;^D
 
-# Para Forzar el pull en caso de conflicto
+# If you have a conflict while doing a pull you can write
 
 `git reset --hard`
 
 Careful! It overwrites your local files!
 
-Si se hace
+If you write
 
 `git log [--oneline]`
 
-se puede volver a un punto concreto del pasado con
+ You can come back to a concrete point of the historial with
 
 `git reset --hard <numero SHA>`
 
@@ -20,7 +20,7 @@ se puede volver a un punto concreto del pasado con
 
 git checkout nombre_de_la_rama
 
-Para poder ver las ramas hay que hacer como minimo un checkout
+In order to watch all the branches you must checkout at least once to every branch
 
 ---
 
