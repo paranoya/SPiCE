@@ -1,0 +1,5 @@
+# Every line starting with '#' is a comment (ignored)
+# Blank lines are also ignored
+
+IMF Kroupa (everything after the 2nd word is also ignored)
+Anthing_else	no	(here tabs are used as separators; no newline at the end necessary)

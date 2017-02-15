@@ -1,44 +1,32 @@
-from SPiCE.Ingredients import Ingredient
+from abc import ABCMeta, abstractmethod
 
 #-------------------------------------------------------------------------------
 
-class IMF(Ingredient):
-    """
-    Initial Mass Function.
-    """
+class IMF(object):
+    """Initial Mass Function"""
     
-#    def __init__(self, parameters):
-#        """
-#        One of the SPiCE parameters must be 'IMF',
-#        and its value must correspond to one of the _*_shape() methods defined within this class,
-#        to be called by the phi(m) method.
-#        \n If the function _*_init() exists, it will be called once upon construction.
-#        """
-#        self.name = parameters.get('IMF','Undefined')
-#        dummy = '_{}_shape'.format(self.name)
-#        if(dummy in dir(self)):
-#            self.shape = self.__class__.__dict__[dummy]
-#            dummy = '_{}_init'.format(self.name)
-##            if(dummy in dir(self)):
-#        else:
-#            print 'ERROR: IMF "{}" not defined'.format(self.name)
-#            print dummy
-#    
-#    def phi(self, m):
-#        """
-#        Given the stellar mass m, in solar masses,
-#        return the number of stars between m and m+dm per unit total mass,
-#        \n dN/dm / int_0^\infty m dN/dm dm
-#        \n in solar masses^-2
-#        """
-#        return shape(m)
-#            
-#    def shape(self, m):
-#        print 'ERROR: IMF not defined'
-#        
-#    def _Kroupa_shape(self, m):
-#        return m**-2.35
+    __metaclass__ = ABCMeta
     
+    @abstractmethod
+    def __init__(self):
+        print 'IMF constructor callled'
+    
+    @abstractmethod
+    def phi(m):
+        """
+        Given stellar mass m, in solar masses,
+        return the number of stars between m and m+dm, per unit total mass,
+        \n dN/dm / int_0^\infty m dN/dm dm \n
+        in solar masses^-2
+        """
+        pass
+    
+    def create(self,imf,args):
+        if IMF_options.has_key(imf)(args):
+            return IMF_options[imf]
+        else:
+            print 'Requested IMF not available:', imf
+            
 #-------------------------------------------------------------------------------
 
 class Salpeter(IMF):
