@@ -84,21 +84,21 @@ class Parameter(Ingredient):
     def __init__(self, parameters):
         print 'Creating instance of parameter', self.__class__.__name__
         self.value = parameters.get(self.__class__.__name__, self.default_value)
-                
-#-------------------------------------------------------------------------------
 
-class FloatNumber(Parameter):
+# -----------------------------------------------------------------------------
+
+class Number(Parameter):
     """
-    A floating-point number within a certain allowed range.
+    A number within a certain allowed range.
     """
     minimum_allowed = None
     maximum_allowed = None
-    
+
     @property
     def value(self):
         print "overriding get value of", self.__class__.__name__, self._value
         return self._value
-    
+
     @value.setter
     def value(self, x_str):
         x = float(x_str)
@@ -111,16 +111,56 @@ class FloatNumber(Parameter):
     def valid(self, x):
         print "Check that", self.__class__.__name__, self.minimum_allowed, "<", x, "<", self.maximum_allowed
         OK_status = True
-        if(self.minimum_allowed != None):
+        if(self.minimum_allowed is not None):
             if(x < self.minimum_allowed):
                 OK_status = False
                 print "WARNING:", x, "<", self.minimum_allowed
-                print " => setting", self.__class__.__name__,"to default value:", self.default_value
-        if(self.maximum_allowed != None):
+                print " => setting", self.__class__.__name__, "to default value:", self.default_value
+        if(self.maximum_allowed is not None):
             if(x > self.maximum_allowed):
                 OK_status = False
                 print "WARNING:", x, ">", self.maximum_allowed
-                print " => setting", self.__class__.__name__,"to default value:", self.default_value
+                print " => setting", self.__class__.__name__, "to default value:", self.default_value
         return OK_status
 
-#-------------------------------------------------------------------------------
+
+class FloatNumber(Number):
+    """
+    A floating-point number within a certain allowed range.
+    """
+
+    @property
+    def value(self):
+        print "overriding get value of", self.__class__.__name__, self._value
+        return self._value
+
+    @value.setter
+    def value(self, x_str):
+        x = float(x_str)
+        print "overriding set value of", self.__class__.__name__, x
+        if self.valid(x):
+            self._value = x
+        else:
+            self._value = self.default_value
+
+
+class IntNumber(Number):
+    """
+    An integer number within a certain allowed range.
+    """
+
+    @property
+    def value(self):
+        print "overriding get value of", self.__class__.__name__, self._value
+        return self._value
+
+    @value.setter
+    def value(self, x_str):
+        x = int(x_str)
+        print "overriding set value of", self.__class__.__name__, x
+        if self.valid(x):
+            self._value = x
+        else:
+            self._value = self.default_value
+
+# -----------------------------------------------------------------------------
