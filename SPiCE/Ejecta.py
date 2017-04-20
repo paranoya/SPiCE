@@ -61,7 +61,12 @@ class EjectaTable:
 
 
 def iron_dust_INAF():
-    """ TODO: add reference! """
+    """ :math:`Z= 3 10^{-4}  Di Criscienzo et al. MNRAS. 433, 313-323.(2013)\n
+        :math:`Z= 10^{-3}  Ventura et al. MNRAS. 420, 1442–1456. (2012) \n
+        :math:`Z= 8 10^{-3} Ventura et al. MNRAS 424, 2345-2357. (2012) \n
+        :math:`Z= 1.8 10^{-2} Dell’Agli et al. MNRAS 467, 4431-4440. (2017) \n
+    
+    """
     Z_star = np.array([3e-4, 1e-3, 8e-3, 1.8e-2])
     m_star = [np.array([1.5,       2.0,      2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]),
               np.array([1.5,       2.0,      2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0]),
