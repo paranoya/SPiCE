@@ -58,6 +58,6 @@ You can come back to a concrete point of the historial with
 
 `git reset --hard <numero SHA>`
 
-Conflicts arise because a given file has been modified differently in two branches. The conflict (to be solved manually) is delimited by `<<<<<<<`, `=======`, and `>>>>>>>`. Write whatever you want to publish, remove the markers, do the usual `git add` to mark the conflict as solved, and try again.
+Conflicts arise because a given file has been modified differently in two branches. The conflict (to be solved manually) is delimited by `<<<<<<<`, `=======`, and `>>>>>>>`. Write whatever you want to publish, remove the markers, do the usual `git add` to mark the conflict as solved, and try `git commit` again.
 
 Good luck!
