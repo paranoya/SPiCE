@@ -1,7 +1,7 @@
 # This is a general title/comment about the run
 
 ## Initial conditions:
-initial_time		0.0
+initial_time		0.0 <in Gyr>
 initial_gas_mass	1.0	in solar masses, fraction, or whatever
 initial_stellar_mass	0.0	<write your comments here (they are ignored ;^D)>
 
