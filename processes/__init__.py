@@ -1,1 +1,1 @@
-from . import star_formation
+from . import registry

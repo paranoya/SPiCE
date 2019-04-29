@@ -9,9 +9,9 @@ Created on Wed Mar 27 10:30:28 2019
 tau = 3.  # gas depletion time, in Gyr
 
 
-def init(parameters):
+def init(params):
     global tau
-    tau = float(parameters.get('tau_SF', tau))
+    tau = float(params['tau_SF'])
 
 
 def compute_derivatives():

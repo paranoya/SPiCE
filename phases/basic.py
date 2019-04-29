@@ -10,17 +10,22 @@ from __future__ import print_function, division
 
 
 # -----------------------------------------------------------------------------
-class Phase(object):
+class Phase:
 
-    def __init__(self, initial_mass=0.):
-        self.current_mass = initial_mass
-        self.dm_dt = 0.
+    def __init__(self, params):
+        self.params = {**self.default_settings(), **params}
 
     def mass(self):
-        return self.current_mass
+        return self.params['current_mass']
 
     def update_derivatives(self, term):
-        self.dm_dt += term
+        self.params['dm_dt'] += term
+
+    def default_settings(self):
+        return {
+            'current_mass': 0.,
+            'dm_dt': 0.
+        }
 
 
 # -----------------------------------------------------------------------------
@@ -46,10 +51,3 @@ class MultiphaseMedium(Phase):
 
     def __getitem__(self, key):
         return self.phases[key]
-
-
-print('hello')
-
-# -----------------------------------------------------------------------------
-#                                                    ... Paranoy@ Rulz! ;^D
-# -----------------------------------------------------------------------------
