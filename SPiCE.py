@@ -8,47 +8,67 @@ Created on Tue Mar 26 11:56:10 2019
 
 from __future__ import print_function, division
 
+import argparse, yaml
+
+import SPiCE
+import settings
 import phases
+from phases import select_phase
 import processes
+
+__version__ = "0.0.1-alpha"
 
 # -----------------------------------------------------------------------------
 class Model(phases.basic.MultiphaseMedium):
 
-    def __init__(self, parameter_file):
-
-        print("Reading parameters from '{}'".format(parameter_file))
-        self.parameters = {}
-        with open(parameter_file) as f:
-            for line in f:
-                words = line.split(None, 2)
-                if(len(words) > 1 and words[0][0] != '#'):
-                    self.parameters[words[0]] = words[1]
+    def __init__(self, context):
         self.phases = {}
-        self.phases['gas'] = phases.basic.Phase(
-                float(self.parameters.get('initial_gas_mass', 0.)))
-        self.phases['stars'] = phases.basic.Phase(
-                float(self.parameters.get('initial_stellar_mass', 0.)))
+        for phase_name in context['phases'].keys():
+            phase = context['phases'][phase_name]
+            self.phases[phase_name] = select_phase(phase['type'])(phase['params'])
 
         self.processes = {}
-        self.processes['star formation'] = processes.star_formation.constant_efficiency
+        for process_type in context['processes'].keys():
+            process = context['processes'][process_type]
+            process_name = process['name']
+            self.processes[process_type] = processes.registry.select_process(process_type, process_name)
+            self.processes[process_type].init(process['params'])
 
     def update_derivatives(self, term):
         print("This should not happen!")
         raise(-1)
 
 
-# <codecell> Initialisation
+def main():
+    parser = argparse.ArgumentParser(
+        prog="SPiCE",
+        description="Command line tools for the SPiCE chemical evolution code.",
+    )
+    parser.add_argument("-v", "--version", action="version", version=SPiCE.__version__)
+    parser.add_argument("--config", metavar="FILENAME", help="configuration file to use containing model initial params")
 
-model = Model('parameters.txt')
+    args = parser.parse_args()
 
-print("\nMasses:")
-for phase in model.phases.keys():
-    print(' ', phase, model[phase].mass(), model.m(phase))
+    user_settings = {}
+    if args.config != None : user_settings = read_config_file(args.config)
 
-print("\nProcesses:")
-for process in model.processes.keys():
-    print(' ', process)
+    context = settings.validate(user_settings)
 
-# -----------------------------------------------------------------------------
-#                                                    ... Paranoy@ Rulz! ;^D
-# -----------------------------------------------------------------------------
+    model = Model(context)
+
+    print("\nMasses:")
+    for phase in model.phases.keys():
+        print(' ', phase, model[phase].params, model.m(phase))
+
+    print("\nProcesses:")
+    for process in model.processes.keys():
+        print(' ', process, model.processes[process].tau)
+
+def read_config_file(name):
+    with open(name, "r") as settings_file:
+        user_settings = yaml.safe_load(settings_file)
+    return user_settings
+
+
+if __name__ == "__main__":
+    main()

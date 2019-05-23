@@ -1,0 +1,26 @@
+initial_gas_mass: 1.0
+initial_stellar_mass: 0.0
+tau_SF: 1
+initial_time: 0.0
+final_time:  13.7
+integrator_relative_accuracy: 1e-6
+imf: kroupa
+binary_star_rates: 0.40
+dtd_sn: rlp
+
+phases:
+  gas:
+    type: simple
+    params:
+      mass: 2.34
+  dust:
+    type: dust
+    params:
+      sticky_coeficient: 0.6254
+      molecular_cloud_density: 5671
+
+processes:
+  star_formation:
+    name: constant
+    params:
+      tau_SF: 3.478
