@@ -6,15 +6,23 @@ Created on Wed Mar 27 10:30:28 2019
 @author: yago
 """
 
-tau = 3.  # gas depletion time, in Gyr
+
+# -----------------------------------------------------------------------------
+class Process(object):
+
+    def compute_derivatives():
+        raise("ERROR: compute_derivatives method not implemented")
 
 
-def init(params):
-    global tau
-    tau = float(params['tau_SF'])
+# -----------------------------------------------------------------------------
+class Constant_efficiency(Process):
 
+    def __init__(self, gas, stars, tau_SF):
+        self.gas = gas  # gas phase that is converted into stars
+        self.tau = tau_SF  # gas depletion time, in Gyr
+        self.stars = stars  # destination stellar phase
 
-def compute_derivatives():
-    SFR = gas.mass()/tau
-    gas.update_derivatives(-SFR)
-    stars.update_derivatives(SFR)
+    def compute_derivatives(self):
+        SFR = self.gas.mass()/self.tau
+        self.gas.update_derivatives(-SFR)
+        self.stars.update_derivatives(SFR)
