@@ -3,7 +3,7 @@
 '''
 Ideal gas classes
 
-Mario Romero		May 2019
+Mario Romero        May 2019
 '''
 
 import numpy as np
@@ -13,103 +13,51 @@ import GasGenerics as gas
 
 
 '''
+SPECIFIC GASES
 This script contains all realistic gas species (e.g. Hydrogen, Helium, etc). They are subclasses of classes from 'GasGenerics.py'
-
-You only need to redefine here 'update_derivatives' and 'default_settings'
 '''
 
+#--------------
+#MONOATOMIC SPECIES
+#Required data = particle mass
+#--------------
 class Neutral_Hydrogen(gas.Monoatomic):
 
-	_particle_mass = (1.008*cte.u).to(u.g) #1.008*atomic_mass
+    _particle_mass = (1.008*cte.u).to(u.g) #1.008*atomic_mass
 
-	def __init__(self):
-		print("Warning: code written for testing purposes!")
-		self.default_settings()
+    def update_derivatives(self,term):
+        print("Neutral_Hydrogen: Work in Progress...")
 
-	def default_settings(self):
-		self._set()
-		return{
-			'current_mass':0.0*u.solMass,
-			'dm_dt': 0.0*(u.solMass/u.yr),
-		}
-
-	def update_derivatives(self,term):
-		#DISCLAIMER: THIS IS AN EXAMPLE!
-		#print("Warning: code written for testing purposes!")
-		uV = u.cm*u.cm*u.cm
-
-		self.dm_dt = 0.0*u.solMass/u.yr
-		dt = 0.0*u.yr
-		for element in term:
-
-			add = 0.0*u.solMass/u.yr
-
-			#Recombination (There is ionized hydrogen)
-			if (isinstance(element,Ionized_Hydrogen)):
-
-				#ov = 4.1e-10*uV/u.s * (element._temperature/u.K)**(-0.8)
-				#tau = 1./(ov * (element._number_density).to(1./uV))
-				tau = 50.*u.yr
-
-				add = (element._gas_mass).to(u.solMass) / (tau).to(u.yr)
-
-			self.dm_dt += add
-
-	def evolve(self,dt):
-
-		#Now evolve (simple Euler scheme)
-		self._gas_mass += self.dm_dt * (dt).to(u.yr)
-
-		#And get the new state
-		self._state(self._pressure,self._temperature,self._gas_mass,-1)
+    def evolve(self,dt):
+        print("Neutral_Hydrogen: 'evolve()' written for testing purposes!")
+        self.state(P=self._pressure,T=self._temperature,M=self._gas_mass)
 
 
 class Ionized_Hydrogen(gas.Monoatomic):
 
-	_particle_mass = (cte.m_p).to(u.g) #Proton mass
+    _particle_mass = (cte.m_p).to(u.g) #Proton mass
 
-	def __init__(self):
-		print("Warning: code written for testing purposes!")
-		self.default_settings()
+    def update_derivatives(self,term):
+        print("Ionized_Hydrogen: Work in Progress...")
 
-	def default_settings(self):
-		self._set()
-		return{
-			'current_mass':0.0*u.solMass,
-			'dm_dt': 0.0*(u.solMass/u.yr),
-		}
+    def evolve(self,dt):
+        print("Ionized_Hydrogen: 'evolve()' written for testing purposes!")
+        self.state(P=self._pressure,T=self._temperature,M=self._gas_mass)
 
-	def update_derivatives(self,term):
-		#DISCLAIMER: THIS IS AN EXAMPLE!
-		#print("Warning: code written for testing purposes!")
-
-		uV = u.cm*u.cm*u.cm
-
-		self.dm_dt = 0.0*u.solMass/u.yr
-		dt = 0.0*u.yr
-
-
-		for element in term:
-
-			add = 0.0*u.solMass/u.yr
-
-			#Recombination (There is neutral hydrogen)
-			if (isinstance(element,Neutral_Hydrogen)):
-
-				#ov = 4.1e-10*uV/u.s * (self._temperature/u.K)**(-0.8)
-				#tau = 1./(ov * (self._number_density).to(1./uV))
-				tau = 50.*u.yr
-
-				add = - (self._gas_mass).to(u.solMass) / ((tau).to(u.yr))
-
-			self.dm_dt += add
-
-			#print(self.dm_dt)
-
-	def evolve(self,dt):
-		
-		#Now evolve (simple Euler scheme)
-		self._gas_mass += self.dm_dt * (dt).to(u.yr)
-
-		#And get the new state
-		self._state(self._pressure,self._temperature,self._gas_mass,-1)
+#--------------
+#DIATOMIC SPECIES
+#Needed data: particle masses (array), distance between particles and their fundamental vibration mode.
+#--------------
+class Molecular_Hydrogen(gas.Diatomic):
+    
+    _atom_mass = [(1.008*cte.u).to(u.g) , (1.008*cte.u).to(u.g)] #Two hydrogen atoms
+    _atom_distance = 74.14*1e-10 * u.cm #Taken from wikipedia
+    _wavenumber = 4342.0*(1./u.cm) #wavenumber (k) of fundamental vibration. Taken from here: https://www.chem.purdue.edu/gchelp/vibs/h2.html  //
+    
+    
+    def update_derivatives(self,term):
+        print("Molecular_Hydrogen: Work in Progress...")
+    
+    def evolve(self,dt):
+        print("Molecular_Hydrogen: 'evolve()' written for testing purposes!")
+        self.state(P=self._pressure,T=self._temperature,M=self._gas_mass)
