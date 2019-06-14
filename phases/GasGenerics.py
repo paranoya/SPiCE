@@ -175,10 +175,10 @@ class Diatomic(Gas):
             Z = 1./theta
             dZ_db = - cte.k_B * self._temperature / theta
         else: #All rotational modes are disabled
-            Z = 1.0
-            dZ_db = 0.0
+            Z = 1.0*no_units
+            dZ_db = 0.0*u.erg
         
-        return [Z*no_units , dZ_db*(u.erg)]
+        return [Z , dZ_db]
         '''
         Note that this is a simplification.
         The exact method has Z = sum (2l+1)*exp(-theta*l(l+1)) ; for l=0 to infinity. 
@@ -195,13 +195,13 @@ class Diatomic(Gas):
         Z = None
         dZ_db = None #Partial derivative of Z with respect to beta = 1./kT
         if xi > 1: #All vibrational modes are disabled
-            Z = 1.0
-            dZ_db = 0.0
+            Z = 1.0*no_units
+            dZ_db = 0.0*u.erg
         else:
             Z = 1./xi
             dZ_db = - cte.k_B * self._temperature / xi
         
-        return [Z*no_units , dZ_db*(u.erg)]
+        return [Z , dZ_db]
         '''
         Again, this is a simplification.
         The exact method has Z = sum exp(-n*xi) = 1./(1-exp(-xi)) . 
