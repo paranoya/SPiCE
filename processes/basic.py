@@ -6,8 +6,6 @@ Created on Wed Jun 26 08:39:06 2019
 @author: yago
 """
 
-from astropy import units as u
-
 
 # -----------------------------------------------------------------------------
 class Process(object):
@@ -22,9 +20,9 @@ class Constant_timescale(Process):
     def __init__(self, model, params):
         self.input = model.phases[params['input_phase']]
         self.output = model.phases[params['output_phase']]
-        self.tau = params['timescale_Gyr']*u.Gyr
+        self.tau_Gyr = float(params['timescale_Gyr'])
 
     def compute_derivatives(self):
-        flux = self.input.current_mass()/self.tau
+        flux = self.input.current_mass_Msun()/self.tau_Gyr
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)
