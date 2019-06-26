@@ -12,7 +12,9 @@ from __future__ import print_function, division
 
 import argparse
 import yaml
-from astropy import units as u
+import numpy as np
+
+from matplotlib import pyplot as plt
 
 import settings
 import phases
@@ -54,12 +56,25 @@ class Model(phases.basic.MultiphaseMedium):
             self.processes[process_name] = processes.registry[process['type']](self, process['params'])
 
         self.integrator = self.context['integrator']
-
         self.run()
 
     def run(self):
-        self.time = [self.integrator['initial_time_Gyr']*u.Gyr]
-
+        print(self.integrator)
+        self.time_Gyr = [self.integrator['initial_time_Gyr']]
+        while self.time_Gyr[-1] < self.integrator['final_time_Gyr']:
+            current_time_Gyr = self.time_Gyr[-1]
+            for phase in self.phases.values():
+                phase.reset_timestep()
+            for process in self.processes.values():
+                process.compute_derivatives()
+            timesteps_Gyr = [self.integrator['final_time_Gyr'] - current_time_Gyr]
+            for phase in self.phases.values():
+                timesteps_Gyr.append(phase.get_timestep_Gyr())
+            timestep_Gyr = np.nanmax([np.nanmin(timesteps_Gyr),
+                                     self.integrator['minimum_timestep_Gyr']])
+            for phase in self.phases.values():
+                phase.update_mass(timestep_Gyr)
+            self.time_Gyr.append(current_time_Gyr + timestep_Gyr)
 
     def update_derivatives(self, term):
         print("This should not happen!")
@@ -86,4 +101,7 @@ if __name__ == "__main__":
 
     print("\nProcesses:")
     for process in model.processes.keys():
-        print(' ', process, model.processes[process].tau)
+        print(' ', process, model.processes[process].tau_Gyr)
+
+#    plt.plot(model.time_Gyr, model['gas'].mass_history_Msun, 'b-')
+#    plt.plot(model.time_Gyr, model['stars'].mass_history_Msun, 'r-')
