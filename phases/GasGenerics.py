@@ -19,11 +19,17 @@ class Gas(basic.MultiphaseMedium):
     #---------------------
     #DEFAULT SETTINGS
     #---------------------
+    def __init__(self, params):
+        self.params = {**self.default_settings(), **params}
+        self._state() #(!) Mirar si hay que meter parametros o no
+    
     def default_settings(self):
-        self._set()
         return{
-            'current_mass':0.0*u.solMass,
+            'mass':0.0*u.solMass,
             'dm_dt': 0.0*(u.solMass/u.yr),
+            
+            'temperature': 0.0*u.K,
+            'pressure':0.0*(u.erg/(u.cm*u.cm*u.cm))
         }
 
     #---------------------
@@ -34,13 +40,13 @@ class Gas(basic.MultiphaseMedium):
         uV = (u.cm*u.cm*u.cm) #volume units
         no_units = u.m/u.m    #dimensionless units
         #Internal variables
-        self._pressure = 0.0*(u.erg/u.s)
-        self._temperature = 0.0*u.K
+        self._pressure = self.params["pressure"].to(u.erg/u.s)
+        self._temperature = self.params["temperature"].to(u.K)
         self._number_particles = 0.0*no_units
         self._thermal_energy = 0.0*u.erg
         self._fugacity = 0.0*no_units
         self._volume = 0.0*uV
-        self._gas_mass = 0.0*u.solMass
+        self._gas_mass = self.params["mass"].to(u.solMass)
         self._chemical_potential = 0.0*u.erg
         self._number_density = 0.0 / uV
         self._mass_density = 0.0*u.g/ uV
@@ -61,9 +67,9 @@ class Gas(basic.MultiphaseMedium):
     #---------------------
     #CONSTRUCTORS
     #---------------------
-    def __init__(self):
-        print("Warning: '__init__()' code written for testing purposes!")
-        self.default_settings()
+    #def __init__(self):
+    #    print("Warning: '__init__()' code written for testing purposes!")
+    #    self.default_settings()
 
     #---------------------
     #OUTPUTS

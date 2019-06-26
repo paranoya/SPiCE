@@ -10,9 +10,24 @@ dtd_sn: rlp
 
 phases:
   gas:
-    type: simple
+    type: simple #NOMBRE DE UNA CLASE
     params:
       mass: 2.34
+    type: ionized_hydrogen
+    params:
+      mass: 2.34
+      temperature: 1.0e6
+      pressure: 1.0e4
+    type: neutral_hydrogen
+    params:
+      mass: 2.34
+      temperature: 1.0e4
+      pressure: 1.0e4
+    type: molecular_hydrogen
+    params:
+      mass: 2.34
+      temperature: 1.0e2
+      pressure: 1.0e4
   dust:
     type: dust
     params:

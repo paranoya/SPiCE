@@ -34,6 +34,7 @@ M0_i = 1000.*u.solMass
 T0_i = 1000.*u.K
 
 #(3) Let's declare hydrogen objects
+#(!) Cambiar esto.
 H2 = species.Molecular_Hydrogen()
 H2.state(P=P0,T=T0_m,M=M0_m) #Your initial conditions goes here
 
