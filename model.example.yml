@@ -1,0 +1,26 @@
+imf: kroupa
+binary_star_rates: 0.40
+dtd_sn: rlp
+
+integrator:
+  relative_accuracy: 1e-6
+  initial_time_Gyr: 0.
+  final_time_Gyr:  13.7
+
+phases:
+  gas:
+    type: basic
+    params:
+      initial_mass_Msun: 2.34
+  stars:
+    type: basic
+    params:
+      initial_mass_Msun: 0.
+
+processes:
+  star_formation:
+    type: timescale_constant
+    params:
+      input_phase: gas
+      output_phase: stars
+      timescale_Gyr: 3.478

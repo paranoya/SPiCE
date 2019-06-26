@@ -1,15 +1,15 @@
 from . import basic
 from . import GasSpecies
-from .dust import Dust
+from . import example
 
-def select_phase(name):
-    available_phases = {
-        "simple": basic.Phase,
+registry = {
+        "basic": basic.Phase,
         "multiphase": basic.MultiphaseMedium,
         "ionized_hydrogen": GasSpecies.Ionized_Hydrogen,
         "neutral_hydrogen": GasSpecies.Neutral_Hydrogen,
         "molecular_hydrogen": GasSpecies.Molecular_Hydrogen,
-        "dust": Dust,
+        "dust": example.dust.Dust,
     }
 
     return available_phases[name]
+
