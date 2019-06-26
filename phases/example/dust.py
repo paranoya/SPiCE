@@ -1,4 +1,4 @@
-from . import basic
+from .. import basic
 
 class Dust(basic.Phase):
 

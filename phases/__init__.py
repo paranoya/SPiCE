@@ -1,11 +1,8 @@
 from . import basic
-from .dust import Dust
+from . import example
 
-def select_phase(name):
-    available_phases = {
-        "simple": basic.Phase,
+registry = {
+        "basic": basic.Phase,
         "multiphase": basic.MultiphaseMedium,
-        "dust": Dust,
-    }
-
-    return available_phases[name]
+        "dust": example.dust.Dust,
+        }
