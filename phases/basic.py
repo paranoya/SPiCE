@@ -8,8 +8,8 @@ Created on Tue Mar 26 11:56:10 2019
 
 from __future__ import print_function, division
 
+import numpy as np
 from astropy import units as u
-
 
 # -----------------------------------------------------------------------------
 class Phase:
@@ -17,7 +17,7 @@ class Phase:
     def __init__(self, model, params):
         self.model = model
         self.params = {**self.default_settings(), **params}
-        self.current_mass = self.params['initial_mass_Msun']*u.Msun
+        self.mass_history = [self.params['initial_mass_Msun']*u.Msun]
         self.dm_dt = self.params['dm_dt_Msun_yr'] * u.Msun/u.yr
 
     def default_settings(self):
@@ -26,8 +26,11 @@ class Phase:
             'dm_dt_Msun_yr': 0.
         }
 
-    def mass(self):
-        return self.current_mass
+    def current_mass(self):
+        return self.mass_history[-1]
+
+    def mass(self, t):
+        return np.interp(t, self.model.time, self.mass_history[-1])
 
     def update_derivatives(self, term):
         self.dm_dt += term
@@ -49,14 +52,14 @@ class MultiphaseMedium(Phase):
     def mass(self):
         m = 0.
         for phase in self.phases.values():
-            m += phase.mass()
+            m += phase.current_mass()
         return m
 
     def m(self, phase='total'):
         if(phase == 'total'):
-            return self.mass()
+            return self.current_mass()
         else:
-            return self.phases[phase].mass()
+            return self.phases[phase].current_mass()
 
     def update_derivatives(self, term):
         print("TO DO: estimate mass fractions")

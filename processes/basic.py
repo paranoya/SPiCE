@@ -25,6 +25,6 @@ class Constant_timescale(Process):
         self.tau = params['timescale_Gyr']*u.Gyr
 
     def compute_derivatives(self):
-        flux = self.input.mass()/self.tau
+        flux = self.input.current_mass()/self.tau
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)

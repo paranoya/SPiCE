@@ -12,10 +12,12 @@ from __future__ import print_function, division
 
 import argparse
 import yaml
+from astropy import units as u
 
 import settings
 import phases
 import processes
+
 
 __version__ = "0.0.1-alpha"
 
@@ -53,7 +55,10 @@ class Model(phases.basic.MultiphaseMedium):
 
         self.integrator = self.context['integrator']
 
-#        self.run()
+        self.run()
+
+    def run(self):
+        self.time = [self.integrator['initial_time_Gyr']*u.Gyr]
 
 
     def update_derivatives(self, term):
