@@ -8,43 +8,61 @@ Created on Tue Mar 26 11:56:10 2019
 
 from __future__ import print_function, division
 
+import numpy as np
+
 
 # -----------------------------------------------------------------------------
 class Phase:
 
-    def __init__(self, params):
+    def __init__(self, model, params):
+        self.model = model
         self.params = {**self.default_settings(), **params}
-
-    def mass(self):
-        return self.params['current_mass']
-
-    def update_derivatives(self, term):
-        self.params['dm_dt'] += term
+        self.mass_history_Msun = [float(self.params['initial_mass_Msun'])]
 
     def default_settings(self):
         return {
-            'current_mass': 0.,
-            'dm_dt': 0.
+            'initial_mass_Msun': 0.,
         }
+
+    def current_mass_Msun(self):
+        return self.mass_history_Msun[-1]
+
+    def mass(self, t):
+        return np.interp(t, self.model.time, self.mass_history[-1])
+
+    def reset_timestep(self):
+        self.dm_dt_Msun_Gyr = 0.
+
+    def update_derivatives(self, term):
+        self.dm_dt_Msun_Gyr += term
+
+    def get_timestep_Gyr(self):
+        return np.abs((self.model.integrator['relative_accuracy']
+                       * self.current_mass_Msun() / self.dm_dt_Msun_Gyr))
+
+    def update_mass(self, timestep_Gyr):
+        self.mass_history_Msun.append(self.current_mass_Msun()
+                                      + self.dm_dt_Msun_Gyr*timestep_Gyr)
 
 
 # -----------------------------------------------------------------------------
 class MultiphaseMedium(Phase):
 
-    def __init__(self, phase_dict={}):
-        self.phases = phase_dict
+    def __init__(self, model, params):
+#        self.phases = phase_dict
+        raise("TO DO: Multiphase medium to be implemented")
 
     def mass(self):
         m = 0.
         for phase in self.phases.values():
-            m += phase.mass()
+            m += phase.current_mass_Msun()
         return m
 
     def m(self, phase='total'):
         if(phase == 'total'):
-            return self.mass()
+            return self.current_mass()
         else:
-            return self.phases[phase].mass()
+            return self.phases[phase].current_mass_Msun()
 
     def update_derivatives(self, term):
         print("TO DO: estimate mass fractions")

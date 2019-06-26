@@ -6,16 +6,11 @@ Created on Wed Mar 27 10:30:28 2019
 @author: yago
 """
 
-
-# -----------------------------------------------------------------------------
-class Process(object):
-
-    def compute_derivatives():
-        raise("ERROR: compute_derivatives method not implemented")
+from . import basic
 
 
 # -----------------------------------------------------------------------------
-class Constant_efficiency(Process):
+class Constant_efficiency(basic.Process):
 
     def __init__(self, gas, stars, tau_SF):
         self.gas = gas  # gas phase that is converted into stars
