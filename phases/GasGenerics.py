@@ -20,8 +20,8 @@ class Gas(basic.MultiphaseMedium):
     #DEFAULT SETTINGS
     #---------------------
     def __init__(self, params):
-        self.params = {**self.default_settings(), **params} #Falta 'model'
-        self._state(P=self.params["pressure"],T=self.params["temperature"],M=self.params["mass"])
+        self.params = {**self.default_settings(), **params}
+        self._state() #(!) Mirar si hay que meter parametros o no
     
     def default_settings(self):
         return{

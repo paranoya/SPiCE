@@ -1,6 +1,7 @@
 from . import basic
 from . import GasSpecies
 from . import example
+from . import GasSpecies
 
 registry = {
         "basic": basic.Phase,
@@ -12,4 +13,3 @@ registry = {
     }
 
     return available_phases[name]
-
