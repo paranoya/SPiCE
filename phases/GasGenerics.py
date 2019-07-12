@@ -20,8 +20,8 @@ class Gas(basic.MultiphaseMedium):
     #DEFAULT SETTINGS
     #---------------------
     def __init__(self, params):
-        self.params = {**self.default_settings(), **params}
-        self._state() #(!) Mirar si hay que meter parametros o no
+        self.params = {**self.default_settings(), **params} #Falta 'model'
+        self._state(P=self.params["pressure"],T=self.params["temperature"],M=self.params["mass"])
     
     def default_settings(self):
         return{
@@ -217,7 +217,7 @@ class Diatomic(Gas):
     #---------------------
     #STATE METHOD
     #---------------------
-    def state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, thermal energy, mass
+    def state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, mass
 
         uV = (u.cm*u.cm*u.cm) #volume units
         no_units = u.m/u.m #dimensionless units
