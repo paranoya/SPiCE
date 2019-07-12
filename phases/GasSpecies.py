@@ -7,7 +7,8 @@ Mario Romero        May 2019
 import numpy as np
 import astropy.units as u
 import astropy.constants as cte
-import GasGenerics as gas
+#import GasGenerics as gas
+from . import GasGenerics as gas
 
 
 '''

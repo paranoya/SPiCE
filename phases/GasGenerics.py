@@ -7,7 +7,7 @@ Mario Romero        May 2019
 import numpy as np
 import astropy.units as u
 import astropy.constants as cte
-import basic
+from . import basic
 
 '''
 PARENT CLASSES
@@ -20,8 +20,8 @@ class Gas(basic.MultiphaseMedium):
     #DEFAULT SETTINGS
     #---------------------
     def __init__(self, params):
-        self.params = {**self.default_settings(), **params}
-        self._state() #(!) Mirar si hay que meter parametros o no
+        self.params = {**self.default_settings(), **params} #Falta 'models', mirate el backup
+        self._state(P=self.params["pressure"],T=self.params["temperature"],M=self.params["mass"]) 
     
     def default_settings(self):
         return{
