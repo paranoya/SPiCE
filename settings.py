@@ -12,8 +12,8 @@ default = {
     'integrator': {
             'initial_time_Gyr': 0.0,
             'final_time_Gyr': 13.7,
-            'relative_accuracy': 1e-6,
-            'minimum_timestep_Gyr': 1e-6
+            'relative_accuracy': 1.0e-6,
+            'minimum_timestep_Gyr': 1.0e-6
             },
     'phases': {},
     'processes': {}
@@ -22,7 +22,7 @@ default = {
 valid_values = {
     'imf': ['salpeter', 'starburst', 'chabrier', 'ferrini', 'kroupa', 'miller_scalo', 'maschberger'],
     'dtd_sn': ['rlp', 'mdvp'], # rlp = Ruiz-Lapuente, mdvp = Mannucci, Della Valle, Panagia (2006)
-    'phases': ['ionized_hydrogen', 'neutral_hydrogen', 'molecular_hydrogen'],
+    #'phases': ['ionized_hydrogen', 'neutral_hydrogen', 'molecular_hydrogen'],
 }
 
 def validate(params):
