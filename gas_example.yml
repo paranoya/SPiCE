@@ -1,0 +1,30 @@
+imf: kroupa
+binary_star_rates: 0.40
+dtd_sn: rlp
+
+integrator:
+#For some reason, you have to give ALL variables of 'integrator' defined in 'settings.py' to make the code work
+  relative_accuracy: 1.0e-6
+  initial_time_Gyr: 0.
+  final_time_Gyr:  13.7
+  minimum_timestep_Gyr: 1.0e-3
+
+phases:
+  gas:
+    type: molecular_hydrogen
+    params:
+      initial_mass_Msun: 2.34
+      initial_temperature_K: 100.
+      initial_pressure_cgs: 1.38e-12 #erg/cm^3
+  stars:
+    type: basic
+    params:
+      initial_mass_Msun: 0.
+
+processes:
+  star_formation:
+    type: timescale_constant
+    params:
+      input_phase: gas
+      output_phase: stars
+      timescale_Gyr: 3.478

@@ -22,7 +22,7 @@ default = {
 valid_values = {
     'imf': ['salpeter', 'starburst', 'chabrier', 'ferrini', 'kroupa', 'miller_scalo', 'maschberger'],
     'dtd_sn': ['rlp', 'mdvp'], # rlp = Ruiz-Lapuente, mdvp = Mannucci, Della Valle, Panagia (2006)
-    #'phases': ['ionized_hydrogen', 'neutral_hydrogen', 'molecular_hydrogen'],
+    #'phases': ['gas','ionized_hydrogen', 'neutral_hydrogen', 'molecular_hydrogen'],
 }
 
 def validate(params):

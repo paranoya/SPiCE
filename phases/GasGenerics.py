@@ -13,101 +13,110 @@ from . import basic
 PARENT CLASSES
 classes defined here should not be defined as objects in the main code.
 '''
-class Gas(basic.MultiphaseMedium):
+class Gas(basic.Phase):
 #class Gas(object):
 
     #---------------------
     #DEFAULT SETTINGS
     #---------------------
-    def __init__(self, params):
-        self.params = {**self.default_settings(), **params} #Falta 'models', mirate el backup
-        self._state(P=self.params["pressure"],T=self.params["temperature"],M=self.params["mass"]) 
+    def __init__(self, model, params):
+        #What everyone does
+        self.model = model
+        self.params = {**self.default_settings(), **params}
+        self.mass_history_Msun = [float(self.params['initial_mass_Msun'])]
+        self.temperature_history_K = [float(self.params['initial_temperature_K'])]
+        self.pressure_history_cgs = [float(self.params['initial_pressure_cgs'])]
+        
+        self._constants()
+        self._set()
+        self._state()
     
+    def _constants(self):
+        #Useful conversions and constants (this will save us LOTS of parentesis, trust me!)
+        self._solMass_to_g = ((1*u.solMass).to(u.g)).value
+        self._kB = ((cte.k_B).to(u.erg/u.K)).value #Boltzmann constant in erg/K
+        self._hP = ((cte.h).to(u.erg*u.s)).value #Planck constant in erg*s
+        self._hbar = self._hP/(2.*np.pi)
+        self._c = ((cte.c).to(u.cm/u.s)).value #Speed of light
+    
+    def _set(self):
+        #All internal variables will be in cgs
+        self._temperature = self.temperature_history_K[-1]
+        self._pressure = self.pressure_history_cgs[-1]
+        self._gas_mass = self.mass_history_Msun[-1]*self._solMass_to_g
+    
+    def current_temperature_K(self):
+        return self.temperature_history_K[-1]
+    def current_pressure_cgs(self):
+        return self.pressure_history_cgs[-1]
+    
+    def update_mass(self, timestep_Gyr):
+        #Actually, this should be called 'update_all', but is called this way to keep compatibility
+        self.mass_history_Msun.append(self.current_mass_Msun() + self.dm_dt_Msun_Gyr*timestep_Gyr)
+        
+        #If you don't want to store the pressure history because, for example, it does not change over time
+        #   you only have to comment the relevant line of these two.
+        self.temperature_history_K.append(self.current_temperature_K())
+        self.pressure_history_cgs.append(self.current_pressure_cgs())
+        
+        self._set()
+        self._state()
+
     def default_settings(self):
         return{
-            'mass':0.0*u.solMass,
-            'dm_dt': 0.0*(u.solMass/u.yr),
-            
-            'temperature': 0.0*u.K,
-            'pressure':0.0*(u.erg/(u.cm*u.cm*u.cm))
+            'initial_mass_Msun':0.0,
+            'initial_temperature_K': 0.0,
+            'initial_pressure_cgs':0.0
         }
 
     #---------------------
     #COMMON ATRIBUTES/METHODS TO ALL DERIVED CLASSES
     #---------------------
-    def _set(self):
-
-        uV = (u.cm*u.cm*u.cm) #volume units
-        no_units = u.m/u.m    #dimensionless units
-        #Internal variables
-        self._pressure = self.params["pressure"].to(u.erg/u.s)
-        self._temperature = self.params["temperature"].to(u.K)
-        self._number_particles = 0.0*no_units
-        self._thermal_energy = 0.0*u.erg
-        self._fugacity = 0.0*no_units
-        self._volume = 0.0*uV
-        self._gas_mass = self.params["mass"].to(u.solMass)
-        self._chemical_potential = 0.0*u.erg
-        self._number_density = 0.0 / uV
-        self._mass_density = 0.0*u.g/ uV
-        self._thermal_energy_density = 0.0*u.erg/uV
-        self._gamma = 0.0*no_units
-    
     def _compute_variables_indepedent_of_state(self):
-        uV = (u.cm*u.cm*u.cm) #volume units
-        no_units = u.m/u.m    #dimensionless units
 
-        self._gas_mass = (self._number_particles * self._particle_mass).to(u.solMass)
-        self._number_density = (self._number_particles / self._volume).to(1./uV)
-        self._mass_density = (self._number_density * self._particle_mass).to(u.g/uV)
-        self._thermal_energy_density = (self._thermal_energy / self._volume).to(u.erg/uV)
-        self._chemical_potential = (cte.k_B*self._temperature*np.log(self._fugacity)).to(u.erg)
-        self._gamma = (1.+(self._pressure/self._thermal_energy_density)).to(no_units)
-
-    #---------------------
-    #CONSTRUCTORS
-    #---------------------
-    #def __init__(self):
-    #    print("Warning: '__init__()' code written for testing purposes!")
-    #    self.default_settings()
+        self._number_density = self._number_particles / self._volume
+        self._mass_density = self._number_density * self._particle_mass_g
+        self._thermal_energy_density = self._thermal_energy / self._volume
+        self._chemical_potential = self._kB*self._temperature*np.log(self._fugacity)
+        self._gamma = 1.+(self._pressure/self._thermal_energy_density)
 
     #---------------------
     #OUTPUTS
     #---------------------
-    def mass(self,units=u.solMass): #Polymorph from Multiphase
-        return (self._gas_mass).to(units)    
+    #def mass(...): comes from basic phase. So I do not redefine here
     def pressure(self,units=u.erg/(u.cm*u.cm*u.cm)):
-        return (self._pressure).to(units)
+        return ((self._pressure)*units).value
     def temperature(self,units=u.K):
-        return (self._temperature).to(units)
+        return ((self._temperature)*units).value
     def number_particles(self,units=u.m/u.m):
-        return (self._number_particles).to(units)
+        return ((self._number_particles)*units).value
     def thermal_energy(self,units=u.erg):
-        return (self._thermal_energy).to(units)
+        return ((self._thermal_energy)*units).value
     def fugacity(self,units=u.m/u.m):
-        return (self._fugacity).to(units)
+        return ((self._fugacity)*units).value
     def volume(self,units=(u.cm*u.cm*u.cm)):
-        return (self._volume).to(units)
+        return ((self._volume)*units).value
     def chemical_potential(self,units=u.erg):
         return (self._chemical_potential).to(units)
     def number_density(self,units=1./(u.cm*u.cm*u.cm)):
-        return (self._number_density).to(units)
+        return ((self._number_density)*units).value
     def mass_density(self,units=u.g/(u.cm*u.cm*u.cm)):
-        return (self._mass_density).to(units)
+        return ((self._mass_density)*units).value
     def thermal_energy_density(self,units=u.erg/(u.cm*u.cm*u.cm)):
-        return (self._thermal_energy_density(self)).to(units)
+        return ((self._thermal_energy_density(self))*(units)).value
     def adiabatic_constant(self,units=u.m/u.m):
-        return (self._gamma).to(units)
+        return ((self._gamma)*units).value
 
     #---------------------
     #POLYMORPHIC METHODS
     #---------------------
     #I.e.: These are the ONLY functions you have to redefine in each subclass
-    def state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, thermal energy, mass
+    def _state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, thermal energy, mass
+        #print("Warning: Using a parent class. Should not happen!")
         raise NameError("Called by parent class. Should not happen!")
 
-    def update_derivatives(self,term):
-        raise NameError("Called by parent class. Should not happen!")
+    #def update_derivatives(self,term): #Comes from basic
+    #    raise NameError("Called by parent class. Should not happen!")
 
 '''
 CHILDS OF GAS
@@ -118,33 +127,15 @@ class Monoatomic(Gas):
     #---------------------
     #STATE METHOD
     #---------------------
-    def state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, thermal energy, mass
-        uV = (u.cm*u.cm*u.cm) #volume units
-        no_units = u.m/u.m    #dimensionless units
+    def _state(self):#inputs: pressure, temperature, number of particles, thermal energy, mass
+        #Here we compute the other thermodynamic variables
+        
+        self._number_particles = (self._gas_mass)/(self._particle_mass_g)
+        self._thermal_energy = 1.5*self._number_particles * self._kB * self._temperature
+        self._volume = (2.*self._thermal_energy) / (3.*self._pressure)
 
-        #Convert mass, if given
-        if M != -1:
-            N = (M.to(u.g))/(self._particle_mass).to(u.g)
-
-        #You MUST give pressure, temperature and number of particles (or total mass)
-        if (P == -1) or (T == -1) or (N == -1):
-            raise NameError("Gas._state() bad initialized! You must give pressure, temperature and total mass/number or particles!")
-        else:
-            #Initialize thermodynamic variables
-            self._pressure = P.to(u.erg/uV)
-            self._number_particles = N.to(no_units)
-
-            self._temperature = T.to(u.K)
-
-            #We compute energy first
-            self._thermal_energy = (1.5*self._number_particles * (cte.k_B) * self._temperature).to(u.erg)
-
-            #Volume...
-            self._volume = ((2.*self._thermal_energy) / (3.*self._pressure)).to(uV)
-
-            #And fugacity
-            self._fugacity = (self._pressure * (2.*np.pi*self._particle_mass / (cte.h*cte.h) )**(-1.5) * (cte.k_B*self._temperature)**(-2.5)).to(no_units)
-    
+        #Fugacity = exp(chemical_potential / kT) . It is another way to describe the chemical potential
+        self._fugacity = self._pressure * (2.*np.pi*self._particle_mass_g / (self._hP*self._hP) )**(-1.5) * (self._kB*self._temperature)**(-2.5)
         #Compute the other variables
         self._compute_variables_indepedent_of_state()
 
@@ -154,35 +145,33 @@ class Diatomic(Gas):
     #AUXILIARY METHODS
     #---------------------
     def _molecule_mass(self):
-        return (self._atom_mass[0]+self._atom_mass[1]).to(u.g)
+        return self._atom_mass_g[0]+self._atom_mass_g[1] #ESTOY AQUÍ
     
     def _moment_of_inertia(self):
         #Get reduced mass
-        
-        m_r = ( self._atom_mass[0]*self._atom_mass[1] / (self._atom_mass[0]+self._atom_mass[1]) ).to(u.g)
-        return m_r*self._atom_distance*self._atom_distance
+        m_r = self._atom_mass_g[0]*self._atom_mass_g[1] / (self._atom_mass_g[0]+self._atom_mass_g[1]) 
+        return m_r*self._atom_distance_cm*self._atom_distance_cm
     
     def _angular_frequency(self):
-        return (self._wavenumber * cte.c ).to(1./u.s)
+        return self._wavenumber_cm_minus1 * self._c 
     
     #---------------------
     #PARTITION FUNCTION METHODS
     #---------------------
     def _Z_rot(self):
-        
-        no_units = u.cm/u.cm
+        #We compute Z for only rotations
+
         #Compute a parameter to check if quantum effects are important
-        theta = ( 0.5 * cte.hbar*cte.hbar / (cte.k_B * self._temperature * self._moment_of_inertia()) ).to(no_units)
-        
+        theta =  0.5 * self._hbar*self._hbar / (self._kB * self._temperature * self._moment_of_inertia()) 
         #Now do stuff
         Z = None
-        dZ_db = None #Partial derivative of Z with respect to beta = 1./kT
+        dZ_db = None #Partial derivative of Z with respect to beta = 1./kT (units: erg)
         if theta <= 1: #All rotational modes are enabled (=classical)
             Z = 1./theta
-            dZ_db = - cte.k_B * self._temperature / theta
+            dZ_db = - self._kB * self._temperature / theta
         else: #All rotational modes are disabled
-            Z = 1.0*no_units
-            dZ_db = 0.0*u.erg
+            Z = 1.0
+            dZ_db = 0.0
         
         return [Z , dZ_db]
         '''
@@ -192,69 +181,56 @@ class Diatomic(Gas):
         '''
     
     def _Z_vib(self):
+        #We compute Z for only molecule vibrations
         
-        no_units = u.cm/u.cm
+        #no_units = u.cm/u.cm
         #Compute a parameter to check if quantum effects are important
-        xi = ( cte.hbar * self._angular_frequency() / (cte.k_B * self._temperature) ).to(no_units)
-        
+        xi = self._hbar * self._angular_frequency() / (self._kB * self._temperature)     
         #Now do stuff
         Z = None
-        dZ_db = None #Partial derivative of Z with respect to beta = 1./kT
+        dZ_db = None #Partial derivative of Z with respect to beta = 1./kT (units: erg)
         if xi > 1: #All vibrational modes are disabled
-            Z = 1.0*no_units
-            dZ_db = 0.0*u.erg
+            Z = 1.0
+            dZ_db = 0.0
         else:
             Z = 1./xi
-            dZ_db = - cte.k_B * self._temperature / xi
+            dZ_db = - self._kB * self._temperature / xi
         
         return [Z , dZ_db]
         '''
         Again, this is a simplification.
         The exact method has Z = sum exp(-n*xi) = 1./(1-exp(-xi)) . 
-        Note that the zero of energies is set as all vibrations at the fundamental state of the harmonic oscillator.
+        Also note that the zero of energies is set as all vibrations at the fundamental state of the harmonic oscillator.
         '''
         
     #---------------------
     #STATE METHOD
     #---------------------
-    def state(self,P=-1,T=-1,M=-1,N=-1):#inputs: pressure, temperature, number of particles, mass
+    def _state(self):#inputs: pressure, temperature, number of particles, mass
 
-        uV = (u.cm*u.cm*u.cm) #volume units
-        no_units = u.m/u.m #dimensionless units
+       #uV = (u.cm*u.cm*u.cm) #volume units
+        #no_units = u.m/u.m #dimensionless units
         
         #Because you give each atom mass individually, you need to construct the particle mass first.
-        self._particle_mass = self._molecule_mass()
+        self._particle_mass_g = self._molecule_mass()
+        #Get the total number of particles
+        self._number_particles = (self._gas_mass)/(self._particle_mass_g)
+        #Let's define an useful variable
+        NkT = self._number_particles * (self._kB) * self._temperature
         
-        #Convert mass, if given
-        if M != -1:
-            N = (M.to(u.g))/(self._particle_mass).to(u.g)
+        #Partition functions (they are arrays, [0] is the Z itself, and [1] the derivative with respect to beta)
+        Zrot = self._Z_rot()
+        Zvib = self._Z_vib()
         
-        #You MUST give pressure, temperature and number of particles (or total mass)
-        if (P == -1) or (T == -1) or (N == -1):
-            raise NameError("Gas._state() bad initialized! You must give pressure, temperature and total mass/number or particles!")
-        else:
-            #Initialize thermodynamic variables
-            self._pressure = P.to(u.erg/uV)
-            self._number_particles = N.to(no_units)
-            self._temperature = T.to(u.K)
-            
-            #Useful variable
-            NkT = (self._number_particles * (cte.k_B).to(u.erg/u.K) * self._temperature).to(u.erg)
-            
-            #Partition functions (they are arrays, [0] is the Z itself, and [1] the derivative with respect to beta)
-            Zrot = self._Z_rot()
-            Zvib = self._Z_vib()
-            
-            #We compute volume first (it's the ideal gas relation)
-            self._volume = ( NkT / self._pressure ).to(uV)
-            
-            #Fugacity...
-            self._fugacity = (self._pressure * (2.*np.pi*self._particle_mass / (cte.h*cte.h) )**(-1.5) * (cte.k_B*self._temperature)**(-2.5) / (Zrot[0]*Zvib[0]) ).to(no_units)
-            
-            #Thermal energy...
-            const_factor = 1.5 - (Zrot[1]/( Zrot[0] * cte.k_B * self._temperature )).to(no_units) - (Zvib[1]/( Zvib[0] * cte.k_B * self._temperature )).to(no_units)
-            self._thermal_energy = NkT * const_factor
-            
-            
-        #Compute the other variables
+        #Now we compute the remaining variables
+        self._volume =  NkT / self._pressure 
+        #Fugacity = exp(chemical_potential / kT) . It is another way to describe the chemical potential
+        self._fugacity = self._pressure * (2.*np.pi*self._particle_mass_g / (self._hP*self._hP) )**(-1.5) * (self._kB*self._temperature)**(-2.5) / (Zrot[0]*Zvib[0])
+        #Thermal energy
+        #const_factor = 1.5 - (Zrot[1]/( Zrot[0] * self._kB * self._temperature )) - (Zvib[1]/( Zvib[0] * self._kB * self._temperature ))
+        const_factor = 1.5                                                      #Translational part
+        const_factor -= (Zrot[1]/( Zrot[0] * self._kB * self._temperature ))    #Rotational part
+        const_factor -= (Zvib[1]/( Zvib[0] * self._kB * self._temperature ))    #Vibrational part
+        self._thermal_energy = NkT * const_factor
+        
         self._compute_variables_indepedent_of_state()

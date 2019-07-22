@@ -28,7 +28,7 @@ class Phase:
         return self.mass_history_Msun[-1]
 
     def mass(self, t):
-        return np.interp(t, self.model.time, self.mass_history[-1])
+        return np.interp(t, self.model.time, self.mass_history_Msun[-1])
 
     def reset_timestep(self):
         self.dm_dt_Msun_Gyr = 0.

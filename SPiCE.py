@@ -42,7 +42,7 @@ class Model(phases.basic.MultiphaseMedium):
 
     def __init__(self, config_file):
         if config_file is None:
-            config_file = 'model.yml.example'
+            config_file = 'gas_example.yml'
         self.read_config_file(config_file)
 
         self.phases = {}
