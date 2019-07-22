@@ -37,8 +37,11 @@ class Phase:
         self.dm_dt_Msun_Gyr += term
 
     def get_timestep_Gyr(self):
-        return np.abs((self.model.integrator['relative_accuracy']
+        try:
+            return np.abs((self.model.integrator['relative_accuracy']
                        * self.current_mass_Msun() / self.dm_dt_Msun_Gyr))
+        except ZeroDivisionError:
+            return np.Infinity
 
     def update_mass(self, timestep_Gyr):
         self.mass_history_Msun.append(self.current_mass_Msun()

@@ -7,24 +7,48 @@ integrator:
   relative_accuracy: 1.0e-6
   initial_time_Gyr: 0.
   final_time_Gyr:  13.7
-  minimum_timestep_Gyr: 1.0e-3
+  minimum_timestep_Gyr: 1.0e-4
 
 phases:
-  gas:
+  gas_HI:
+    type: ionized_hydrogen
+    params:
+      initial_mass_Msun: 100.
+      initial_temperature_K: 1.0e4
+      initial_pressure_cgs: 1.38e-12 #erg/cm^3
+  gas_H:
+    type: neutral_hydrogen
+    params:
+      initial_mass_Msun: 0.0
+      initial_temperature_K: 100.
+      initial_pressure_cgs: 1.38e-12 #erg/cm^3
+  gas_H2:
     type: molecular_hydrogen
     params:
-      initial_mass_Msun: 2.34
+      initial_mass_Msun: 0.0
       initial_temperature_K: 100.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   stars:
     type: basic
     params:
-      initial_mass_Msun: 0.
+      initial_mass_Msun: 0.0
 
 processes:
+  recombination:
+    type: H_recombination
+    params:
+      input_phase: gas_HI
+      output_phase: gas_H
+  molecule_formation:
+    type: H2_formation
+    params:
+      input_phase: gas_H
+      output_phase: gas_H2
+      agent_phase: gas_HI
+      metallicity: 0.02 #Placeholder! one should put something like 'agent_phase2: dust' or something for better models
   star_formation:
     type: timescale_constant
     params:
-      input_phase: gas
+      input_phase: gas_H2
       output_phase: stars
       timescale_Gyr: 3.478

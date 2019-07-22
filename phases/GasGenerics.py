@@ -14,7 +14,6 @@ PARENT CLASSES
 classes defined here should not be defined as objects in the main code.
 '''
 class Gas(basic.Phase):
-#class Gas(object):
 
     #---------------------
     #DEFAULT SETTINGS
@@ -74,11 +73,16 @@ class Gas(basic.Phase):
     #---------------------
     def _compute_variables_indepedent_of_state(self):
 
-        self._number_density = self._number_particles / self._volume
+        try:
+            self._number_density = self._number_particles / self._volume
+            self._thermal_energy_density = self._thermal_energy / self._volume
+            self._gamma = 1.+(self._pressure/self._thermal_energy_density)
+        except ZeroDivisionError:
+            self._number_density = 0.0
+            self._thermal_energy_density = 0.0
+            self._gamma = np.Infinity
         self._mass_density = self._number_density * self._particle_mass_g
-        self._thermal_energy_density = self._thermal_energy / self._volume
         self._chemical_potential = self._kB*self._temperature*np.log(self._fugacity)
-        self._gamma = 1.+(self._pressure/self._thermal_energy_density)
 
     #---------------------
     #OUTPUTS

@@ -7,7 +7,7 @@ Mario Romero        May 2019
 #import numpy as np
 import astropy.units as u
 import astropy.constants as cte
-import GasGenerics as gas
+from . import GasGenerics as gas
 
 '''
 SOME CONSTANTS
@@ -26,7 +26,7 @@ This script contains all realistic gas species (e.g. Hydrogen, Helium, etc). The
 #Required data = particle mass
 #--------------
 class Neutral_Hydrogen(gas.Monoatomic):
-    _particle_mass_g = 1.008*atomic_mass_g #1.008*atomic_mass
+    _particle_mass_g = 1.008*atomic_mass_g 
 
 class Ionized_Hydrogen(gas.Monoatomic):
     _particle_mass_g = proton_mass_g #Proton mass
