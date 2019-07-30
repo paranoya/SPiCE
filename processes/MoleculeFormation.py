@@ -30,6 +30,7 @@ class MolecularHydrogen_Formation(basic.Process):
     
     def compute_derivatives(self):
         flux = self.input.current_mass_Msun()/self.tau_Gyr
+        #print(self.input.current_mass_Msun(),self.tau_Gyr,flux,'\n')
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)
         self.tau_Gyr = self._formation_timescale()
@@ -38,26 +39,24 @@ class MolecularHydrogen_Formation(basic.Process):
     #GETTING PHYSICAL PARAMETERS
     #---------------------
     def _dust_density(self):
-        total_H_density_cm3 = 0.5*self.agent.number_density() + self.input.number_density() + 2.*self.output.number_density()
-        print(total_H_density_cm3,self.agent.number_density(),self.input.number_density(),self.output.number_density())
+        #total_H_density_cm3 = 0.5*self.agent.number_density() + self.input.number_density() + 2.*self.output.number_density()
+        total_V_cm3 = self.agent.volume() + self.input.volume() + self.output.volume()
+        total_H_density_cm3 = (0.5*self.agent.volume()/total_V_cm3)*self.agent.number_density() + (self.input.volume()/total_V_cm3)*self.input.number_density()+ (2.*self.output.volume()/total_V_cm3)*self.output.number_density()
+        #print(total_H_density_cm3)
         return self._Z * total_H_density_cm3
     def _formation_timescale(self):
         #Taking Ascasibar+(in prep) formula again, ignoring the effective metallicity thing
-        mean_ov_cm3_s = 6.e-17 * ((self.input.temperature()/100.)**(0.5)) #Neutral H or H2 temperature????
+        mean_ov_cm3_per_s = 6.e-17 * ((self.input.temperature()/100.)**(0.5)) #Neutral H or H2 temperature????
         #mean_ov_cm3_Gyr = 0.189*(self.input.temperature()/100.)**(0.5)
         
         tau_s = None #Not the correct tau unit-wise
         try:
-            tau_s = 0.5/(mean_ov_cm3_s * self._dust_density())
-            #tau_Gyr = 0.5/(mean_ov_cm3_Gyr * self._dust_density())
+            tau_s = 0.5/(mean_ov_cm3_per_s * self._dust_density())
         except ZeroDivisionError:
             tau_s = np.Infinity
-            #tau_Gyr = np.Infinity
         
-        #print(tau_s*self._s_to_Gyr)
-        #print(self._s_to_Gyr)
         return tau_s*self._s_to_Gyr #Correct units.
-        #return tau_Gyr
+    
     #---------------------
     #DEFINING USEFUL VARIABLES
     #---------------------

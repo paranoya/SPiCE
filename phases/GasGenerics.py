@@ -26,6 +26,7 @@ class Gas(basic.Phase):
         self.temperature_history_K = [float(self.params['initial_temperature_K'])]
         self.pressure_history_cgs = [float(self.params['initial_pressure_cgs'])]
         
+        #self._count = 0
         self._constants()
         self._set()
         self._state()
@@ -40,9 +41,14 @@ class Gas(basic.Phase):
     
     def _set(self):
         #All internal variables will be in cgs
+        
         self._temperature = self.temperature_history_K[-1]
         self._pressure = self.pressure_history_cgs[-1]
         self._gas_mass = self.mass_history_Msun[-1]*self._solMass_to_g
+        #print(self.mass_history_Msun[-1],self._solMass_to_g,self.mass_history_Msun[-1]*self._solMass_to_g)
+        #self._count +=1
+        #if self._count > 2:
+        #    raise
     
     def current_temperature_K(self):
         return self.temperature_history_K[-1]
@@ -119,8 +125,11 @@ class Gas(basic.Phase):
         #print("Warning: Using a parent class. Should not happen!")
         raise NameError("Called by parent class. Should not happen!")
 
-    #def update_derivatives(self,term): #Comes from basic
-    #    raise NameError("Called by parent class. Should not happen!")
+    #---------------------
+    #DEBUGGING
+    #---------------------
+    def debug(self):
+        print([self._gas_mass,self._particle_mass_g])
 
 '''
 CHILDS OF GAS

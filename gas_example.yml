@@ -9,22 +9,22 @@ integrator:
   minimum_timestep_Gyr: 1.0e-4
 
 phases:
-  gas_HI:
+  gas_HII:
     type: ionized_hydrogen
     params:
-      initial_mass_Msun: 99.8
+      initial_mass_Msun: 99.98
       initial_temperature_K: 1.0e4
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
-  gas_H:
+  gas_HI:
     type: neutral_hydrogen
     params:
-      initial_mass_Msun: 0.1
-      initial_temperature_K: 1000.
+      initial_mass_Msun: 0.01
+      initial_temperature_K: 100.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   gas_H2:
     type: molecular_hydrogen
     params:
-      initial_mass_Msun: 0.1
+      initial_mass_Msun: 0.01
       initial_temperature_K: 10.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   stars:
@@ -42,14 +42,14 @@ processes:
   recombination:
     type: H_recombination
     params:
-      input_phase: gas_HI
-      output_phase: gas_H
+      input_phase: gas_HII
+      output_phase: gas_HI
   molecule_formation:
     type: H2_formation
     params:
-      input_phase: gas_H
+      input_phase: gas_HI
       output_phase: gas_H2
-      agent_phase: gas_HI
+      agent_phase: gas_HII
       metallicity: 0.02 #Placeholder! one should put something like 'agent_phase2: dust' or something for better models
 #  photoionization:
 #    type: H_photoionization
