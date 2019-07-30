@@ -75,6 +75,7 @@ class Model(phases.basic.MultiphaseMedium):
             for phase in self.phases.values():
                 phase.update_mass(timestep_Gyr)
             self.time_Gyr.append(current_time_Gyr + timestep_Gyr)
+        #print(self.time_Gyr)
 
     def update_derivatives(self, term):
         print("This should not happen!")
