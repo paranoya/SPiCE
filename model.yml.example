@@ -3,7 +3,6 @@ binary_star_rates: 0.40
 dtd_sn: rlp
 
 integrator:
-#For some reason, you have to give ALL variables of 'integrator' defined in 'settings.py' to make the code work
   relative_accuracy: 1.0e-6
   initial_time_Gyr: 0.
   final_time_Gyr:  13.7

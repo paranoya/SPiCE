@@ -21,7 +21,7 @@ import phases
 import processes
 
 
-__version__ = "0.0.2-alpha"
+__version__ = "0.0.1-alpha"
 
 
 def get_class(base_module, class_name):
@@ -42,7 +42,8 @@ class Model(phases.basic.MultiphaseMedium):
 
     def __init__(self, config_file):
         if config_file is None:
-            config_file = 'gas_example.yml'
+            config_file = 'model.yml.example'
+
         self.read_config_file(config_file)
 
         self.phases = {}
@@ -75,13 +76,10 @@ class Model(phases.basic.MultiphaseMedium):
             for phase in self.phases.values():
                 phase.update_mass(timestep_Gyr)
             self.time_Gyr.append(current_time_Gyr + timestep_Gyr)
-        #print(self.time_Gyr)
 
     def update_derivatives(self, term):
         print("This should not happen!")
         raise(-1)
-
-
 
 
 if __name__ == "__main__":

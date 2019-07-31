@@ -10,11 +10,11 @@ default = {
     'binary_star_rates': 0.40,            # Fraction of binary systems
     'dtd_sn': "rlp",
     'integrator': {
-            'initial_time_Gyr': 0.0,
-            'final_time_Gyr': 13.7,
-            'relative_accuracy': 1.0e-6,
-            'minimum_timestep_Gyr': 1.0e-6
-            },
+        'initial_time_Gyr': 0.0,
+        'final_time_Gyr': 13.7,
+        'relative_accuracy': 1e-6,
+        'minimum_timestep_Gyr': 1e-6
+        },
     'phases': {},
     'processes': {}
 }
@@ -26,7 +26,12 @@ valid_values = {
 }
 
 def validate(params):
+    for key, value in default.items():
+        if isinstance(value,dict) and key in params:
+            params[key] = {**value, **params[key]}
+
     params = {**default, **params}
+
     for param in valid_values.keys():
         if params[param] not in valid_values[param]:
             print(f'Provided value for {param} is incorrect.')
