@@ -37,6 +37,6 @@ class Basic_Photoionization(basic.Process):
         
         try:
             self.tau_Gyr = self.input.current_mass_Msun() / flux
-        except ZeroDivisionError:
+        except (FloatingPointError,ZeroDivisionError):
             self.tau_Gyr = np.Infinity
         #print(self.model.input)

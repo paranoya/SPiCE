@@ -41,6 +41,8 @@ class Model(phases.basic.MultiphaseMedium):
         self.context = settings.validate(user_settings)
 
     def __init__(self, config_file):
+        #The code crash with 'FloatingPointError' for the cases: "x/0", overflow, underflow and nan ("0/0" or "inf/inf")
+        np.seterr(divide='raise',over='raise',under='raise',invalid='raise')
         if config_file is None:
             config_file = 'gas_example.yml'
 

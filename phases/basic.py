@@ -40,7 +40,8 @@ class Phase:
         try:
             return np.abs((self.model.integrator['relative_accuracy']
                        * self.current_mass_Msun() / self.dm_dt_Msun_Gyr))
-        except ZeroDivisionError:
+        except (FloatingPointError,ZeroDivisionError):
+            #How should the previous expression be solved if gives 0/0?
             return np.Infinity
 
     def update_mass(self, timestep_Gyr):

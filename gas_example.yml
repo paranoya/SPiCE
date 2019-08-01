@@ -12,19 +12,19 @@ phases:
   gas_HII:
     type: ionized_hydrogen
     params:
-      initial_mass_Msun: 99.98
+      initial_mass_Msun: 100.
       initial_temperature_K: 1.0e4
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   gas_HI:
     type: neutral_hydrogen
     params:
-      initial_mass_Msun: 0.01
+      initial_mass_Msun: 0.0
       initial_temperature_K: 100.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   gas_H2:
     type: molecular_hydrogen
     params:
-      initial_mass_Msun: 0.01
+      initial_mass_Msun: 0.0
       initial_temperature_K: 10.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   stars:

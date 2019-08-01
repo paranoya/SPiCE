@@ -58,6 +58,7 @@ class Gas(basic.Phase):
     def update_mass(self, timestep_Gyr):
         #Euler integrator is becoming a bottleneck, it should be replaced with a more efficient one.
         #Actually, this should be called 'update_all', but is called this way to keep compatibility
+        #print(self.current_mass_Msun())
         self.mass_history_Msun.append(self.current_mass_Msun() + self.dm_dt_Msun_Gyr*timestep_Gyr)
         
         #If you don't want to store the pressure history because, for example, it does not change over time
@@ -84,12 +85,13 @@ class Gas(basic.Phase):
             self._number_density = self._number_particles / self._volume
             self._thermal_energy_density = self._thermal_energy / self._volume
             self._gamma = 1.+(self._pressure/self._thermal_energy_density)
-        except ZeroDivisionError:
+        except (FloatingPointError,ZeroDivisionError):
             self._number_density = 0.0
             self._thermal_energy_density = 0.0
             self._gamma = np.Infinity
         self._mass_density = self._number_density * self._particle_mass_g
         self._chemical_potential = self._kB*self._temperature*np.log(self._fugacity)
+        #print(self._thermal_energy_density , self._thermal_energy , self._volume)
 
     #---------------------
     #OUTPUTS
