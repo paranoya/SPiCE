@@ -12,40 +12,31 @@ from . import basic
 
 '''
 Hydrogen Photoionization
-H -> HI process
+HI -> HII process
 '''
-class Hydrogen_Photoionization(basic.Process):
+class Basic_Photoionization(basic.Process):
     
     #---------------------
     #INIT
     #---------------------
     def __init__(self, model, params):
-        self.input = model.phases[params['output_phase']] #Neutral Hydrogen
-        self.output = model.phases[params['input_phase']]   #Ionized Hydrogen
-        
-        self._constants()
-        self.tau_Gyr = self._recombination_timescale()
+        self.input = model.phases[params['input_phase']]
+        self.output = model.phases[params['output_phase']] 
+        self.agent = model.phases[params['agent_phase']]  #Stars
+        self._eff = float(params['efficiency']) #=Mass of photoionized gas per Mass of stars
     
     def compute_derivatives(self):
-        flux = self.input.current_mass_Msun()/self.tau_Gyr
+        #flux = self.input.current_mass_Msun()/self.tau_Gyr
+        try:
+            flux = self._eff * self.agent.SFR_history_Msun_per_Gyr[-1]
+        except IndexError:
+            flux = 0.0
+        #print(self.agent.SFR_history_Msun_per_Gyr[0])
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)
-    #---------------------
-    #GETTING THE TAU
-    #---------------------
-    def _recombination_timescale(self):
-        #Taking Ascasibar+(in prep) formula
-        mean_ov_cm3_s = 4.1e-10 * (self.input.temperature())**(-0.8) #Case B recombination cross-section (Verner&Ferland 96)
         
-        tau_s = None #Not the correct tau unit-wise
         try:
-            tau_s = 2./(mean_ov_cm3_s * self.input.number_density())
+            self.tau_Gyr = self.input.current_mass_Msun() / flux
         except ZeroDivisionError:
-            tau_s = np.Infinity
-        
-        return tau_s*self._s_to_Gyr #Correct units.
-    #---------------------
-    #DEFINING USEFUL VARIABLES
-    #---------------------
-    def _constants(self):
-        self._s_to_Gyr = ((1.*u.s).to(u.Gyr)).value
+            self.tau_Gyr = np.Infinity
+        #print(self.model.input)

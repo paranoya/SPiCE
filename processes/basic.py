@@ -26,3 +26,5 @@ class Constant_timescale(Process):
         flux = self.input.current_mass_Msun()/self.tau_Gyr
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)
+        #PLACEHOLDER! This will fail if two processes give an SFR as main result
+        self.output.SFR_history_Msun_per_Gyr.append(flux)

@@ -30,7 +30,6 @@ class MolecularHydrogen_Formation(basic.Process):
     
     def compute_derivatives(self):
         flux = self.input.current_mass_Msun()/self.tau_Gyr
-        #print(self.input.current_mass_Msun(),self.tau_Gyr,flux,'\n')
         self.input.update_derivatives(-flux)
         self.output.update_derivatives(flux)
         self.tau_Gyr = self._formation_timescale()

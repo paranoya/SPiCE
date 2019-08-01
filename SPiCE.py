@@ -21,7 +21,7 @@ import phases
 import processes
 
 
-__version__ = "0.0.1-alpha"
+__version__ = "0.0.2-alpha"
 
 
 def get_class(base_module, class_name):
@@ -42,7 +42,7 @@ class Model(phases.basic.MultiphaseMedium):
 
     def __init__(self, config_file):
         if config_file is None:
-            config_file = 'model.yml.example'
+            config_file = 'gas_example.yml'
 
         self.read_config_file(config_file)
 
@@ -73,8 +73,11 @@ class Model(phases.basic.MultiphaseMedium):
                 timesteps_Gyr.append(phase.get_timestep_Gyr())
             timestep_Gyr = np.nanmax([np.nanmin(timesteps_Gyr),
                                      self.integrator['minimum_timestep_Gyr']])
+            #total_mass_sum= 0
             for phase in self.phases.values():
+            #    total_mass_sum += phase.current_mass_Msun()
                 phase.update_mass(timestep_Gyr)
+            #print(total_mass_sum)
             self.time_Gyr.append(current_time_Gyr + timestep_Gyr)
 
     def update_derivatives(self, term):

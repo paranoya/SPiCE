@@ -44,6 +44,7 @@ class Phase:
             return np.Infinity
 
     def update_mass(self, timestep_Gyr):
+        #Euler integrator is becoming a bottleneck, it should be replaced with a more efficient one.
         self.mass_history_Msun.append(self.current_mass_Msun()
                                       + self.dm_dt_Msun_Gyr*timestep_Gyr)
 

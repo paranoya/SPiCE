@@ -56,6 +56,7 @@ class Gas(basic.Phase):
         return self.pressure_history_cgs[-1]
     
     def update_mass(self, timestep_Gyr):
+        #Euler integrator is becoming a bottleneck, it should be replaced with a more efficient one.
         #Actually, this should be called 'update_all', but is called this way to keep compatibility
         self.mass_history_Msun.append(self.current_mass_Msun() + self.dm_dt_Msun_Gyr*timestep_Gyr)
         

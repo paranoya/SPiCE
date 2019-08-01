@@ -6,7 +6,7 @@ integrator:
   relative_accuracy: 1.0e-6
   initial_time_Gyr: 0.
   final_time_Gyr:  13.7
-  minimum_timestep_Gyr: 1.0e-4
+  minimum_timestep_Gyr: 1.0e-4 #Should not be higher with the current integrator we have
 
 phases:
   gas_HII:
@@ -28,7 +28,7 @@ phases:
       initial_temperature_K: 10.
       initial_pressure_cgs: 1.38e-12 #erg/cm^3
   stars:
-    type: basic
+    type: star
     params:
       initial_mass_Msun: 0.0
 
@@ -51,17 +51,17 @@ processes:
       output_phase: gas_H2
       agent_phase: gas_HII
       metallicity: 0.02 #Placeholder! one should put something like 'agent_phase2: dust' or something for better models
-#  photoionization:
-#    type: H_photoionization
-#    params:
-#      input_phase: gas_H
-#      output_phase: gas_HI
-#      agent_process: star_formation
-#      efficiency: 955.29
-#  photodissociation:
-#    type: H_photodissociation
-#    params:
-#      input_phase: gas_H2
-#      output_phase: gas_H
-#      agent_process: star_formation
-#      efficiency: 380.93
+  photoionization:
+    type: basic_photoionization
+    params:
+      input_phase: gas_HI
+      output_phase: gas_HII
+      agent_phase: stars
+      efficiency: 955.29
+  photodissociation:
+    type: basic_photoionization
+    params:
+      input_phase: gas_H2
+      output_phase: gas_HI
+      agent_phase: stars
+      efficiency: 380.93
