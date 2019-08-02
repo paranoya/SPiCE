@@ -5,7 +5,7 @@ dtd_sn: rlp
 integrator:
   relative_accuracy: 1.0e-6
   initial_time_Gyr: 0.
-  final_time_Gyr:  13.7
+  final_time_Gyr: 13.7
   minimum_timestep_Gyr: 1.0e-4 #Should not be higher with the current integrator we have
 
 phases:

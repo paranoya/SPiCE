@@ -26,10 +26,18 @@ class Gas(basic.Phase):
         self.temperature_history_K = [float(self.params['initial_temperature_K'])]
         self.pressure_history_cgs = [float(self.params['initial_pressure_cgs'])]
         
-        #self._count = 0
         self._constants()
         self._set()
         self._state()
+    
+    def reset_timestep(self):
+        self.dm_dt_Msun_Gyr = 0.
+        self.dP_dt_cgs_Gyr = 0.
+        
+    def current_temperature_K(self):
+        return self.temperature_history_K[-1]
+    def current_pressure_cgs(self):
+        return self.pressure_history_cgs[-1]
     
     def _constants(self):
         #Useful conversions and constants (this will save us LOTS of parentesis, trust me!)
@@ -38,6 +46,7 @@ class Gas(basic.Phase):
         self._hP = ((cte.h).to(u.erg*u.s)).value #Planck constant in erg*s
         self._hbar = self._hP/(2.*np.pi)
         self._c = ((cte.c).to(u.cm/u.s)).value #Speed of light
+        self._G = ((cte.G).to(u.cm*u.cm*u.cm/(u.g*u.s*u.s))).value #Gravitational constant
     
     def _set(self):
         #All internal variables will be in cgs
@@ -45,26 +54,31 @@ class Gas(basic.Phase):
         self._temperature = self.temperature_history_K[-1]
         self._pressure = self.pressure_history_cgs[-1]
         self._gas_mass = self.mass_history_Msun[-1]*self._solMass_to_g
-        #print(self.mass_history_Msun[-1],self._solMass_to_g,self.mass_history_Msun[-1]*self._solMass_to_g)
-        #self._count +=1
-        #if self._count > 2:
-        #    raise
-    
-    def current_temperature_K(self):
-        return self.temperature_history_K[-1]
-    def current_pressure_cgs(self):
-        return self.pressure_history_cgs[-1]
     
     def update_mass(self, timestep_Gyr):
         #Euler integrator is becoming a bottleneck, it should be replaced with a more efficient one.
         #Actually, this should be called 'update_all', but is called this way to keep compatibility
-        #print(self.current_mass_Msun())
+        #------------------------------
+        
+        #First, I deal with Elmegreen89 Formula to get the pressure (or the box area if first iteration)
+        new_pressure = self.current_pressure_cgs()
+        try:
+            self._box_area_cm2 #It will go to the except block for the first iteration
+            #self._compute_pressure_derivative()
+            new_pressure = self._compute_pressure_directly()
+        except AttributeError:
+            self._set_box_area()
+        #Update mass
         self.mass_history_Msun.append(self.current_mass_Msun() + self.dm_dt_Msun_Gyr*timestep_Gyr)
+        
+        #Update pressure
+        #self.pressure_history_cgs.append(self.current_pressure_cgs() + self.dP_dt_cgs_Gyr*timestep_Gyr)
+        self.pressure_history_cgs.append(new_pressure)
+        #print(self.current_pressure_cgs()/self._kB,self.current_mass_Msun(),type(self))
         
         #If you don't want to store the pressure history because, for example, it does not change over time
         #   you only have to comment the relevant line of these two.
         self.temperature_history_K.append(self.current_temperature_K())
-        self.pressure_history_cgs.append(self.current_pressure_cgs())
         
         self._set()
         self._state()
@@ -85,14 +99,100 @@ class Gas(basic.Phase):
             self._number_density = self._number_particles / self._volume
             self._thermal_energy_density = self._thermal_energy / self._volume
             self._gamma = 1.+(self._pressure/self._thermal_energy_density)
+            self._chemical_potential = self._kB*self._temperature*np.log(self._fugacity)
         except (FloatingPointError,ZeroDivisionError):
             self._number_density = 0.0
             self._thermal_energy_density = 0.0
             self._gamma = np.Infinity
+            self._chemical_potential = -np.Infinity
         self._mass_density = self._number_density * self._particle_mass_g
-        self._chemical_potential = self._kB*self._temperature*np.log(self._fugacity)
         #print(self._thermal_energy_density , self._thermal_energy , self._volume)
-
+    
+    def _set_box_area(self):
+        #Here we use the Elmegreen89 (approximate) formula for pressure:
+        #P_gas = (pi/2) * G * (S_gas + S_Total)
+        #Where S is the superficial density = Mass/Area. We don't have the area, so we compute it here as a 'constant'
+        #Here we get the Area
+        
+        #Get total mass, and total GAS mass
+        total_mass = 0.0
+        total_gas_mass = 0.0
+        total_gas_pressure = 0.0
+        for phase in self.model.phases.values():
+            total_mass += phase.mass_history_Msun[0] #We need only the first value, and it may be updated, so using 'current_mass' is a bad idea 
+            if( issubclass(type(phase),Gas) ):
+                total_gas_mass += phase.mass_history_Msun[0]
+                total_gas_pressure += phase.pressure_history_cgs[0]
+        #Convert to cgs
+        total_mass *= self._solMass_to_g
+        total_gas_mass *= self._solMass_to_g
+        #Get the result
+        self._box_area_cm2 = np.sqrt( np.pi*self._G*total_gas_mass*total_mass / (2.*total_gas_pressure) )
+    
+    def _compute_pressure_directly(self):
+        #Here we use the Elmegreen89 (approximate) formula for pressure:
+        #P_i = (pi/2) * G * (S_i + S_Total)
+        #Where S is the superficial density = Mass/Area. We don't have the area, so we compute it here as a 'constant'
+        #Here we compute P_i using the formula.
+        
+        #Here we need the total mass again.
+        #Total mass of a previous phase may be updated before in the main routine. We have to cover this!
+        total_mass = 0.0
+        thisPhase_historylength = len(self.mass_history_Msun)
+        for phase in self.model.phases.values():
+            currentPhase_historylength = len(phase.mass_history_Msun)
+            if( thisPhase_historylength == currentPhase_historylength ):
+                #currentPhase has not been updated yet, use current value
+                total_mass += phase.mass_history_Msun[-1]
+            elif( thisPhase_historylength == currentPhase_historylength-1 ):
+                #currentPhase has been updated in this timestep before this call
+                total_mass += phase.mass_history_Msun[-2]
+            else:
+                print("This should not happen!")
+                raise(-1)
+        #Make the conversion Msun->g
+        total_mass = total_mass * self._solMass_to_g
+        current_mass = self.current_mass_Msun() * self._solMass_to_g
+        #Get the new pressure
+        return current_mass*total_mass*( np.pi*self._G / (2.*self._box_area_cm2*self._box_area_cm2) )
+        
+        
+    '''   
+    def _compute_pressure_derivative(self):
+        #Here we use the Elmegreen89 (approximate) formula for pressure:
+        #P_i = (pi/2) * G * (S_i + S_Total)
+        #Where S is the superficial density = Mass/Area. We don't have the area, so we compute it here as a 'constant'
+        #Here we compute the derivative of P_i
+        
+        #print(  (np.sqrt(self._box_area_cm2/np.pi)*u.cm).to(u.pc) ) #Need to check if we have the correct numbers!
+        
+        #Here we need the sum of all derivatives of dm_dt, and again the total mass.
+        #Total mass of a previous phase may be updated before in the main routine. We have to cover this!
+        total_dm_dt_Msun_Gyr = 0.0
+        total_mass = 0.0
+        thisPhase_historylength = len(self.mass_history_Msun)
+        for phase in self.model.phases.values():
+            currentPhase_historylength = len(phase.mass_history_Msun)
+            if( thisPhase_historylength == currentPhase_historylength ):
+                #currentPhase has not been updated yet, use current value
+                total_mass += phase.mass_history_Msun[-1]
+            elif( thisPhase_historylength == currentPhase_historylength-1 ):
+                #currentPhase has been updated in this timestep before this call
+                total_mass += phase.mass_history_Msun[-2]
+            else:
+                print("This should not happen!")
+                raise(-1)
+            #Sum derivatives
+            total_dm_dt_Msun_Gyr += phase.dm_dt_Msun_Gyr
+        #Make the conversion Msun->g
+        total_dm_dt_g_Gyr = total_dm_dt_Msun_Gyr * self._solMass_to_g
+        curr_dm_dt_g_Gyr = self.dm_dt_Msun_Gyr * self._solMass_to_g
+        total_mass = total_mass * self._solMass_to_g
+        current_mass = self.current_mass_Msun() * self._solMass_to_g
+        #Get the pressure derivative
+        self.dP_dt_cgs_Gyr = curr_dm_dt_g_Gyr*total_mass + current_mass*total_dm_dt_g_Gyr
+        self.dP_dt_cgs_Gyr *= np.pi*self._G / (2.*self._box_area_cm2*self._box_area_cm2)
+    '''
     #---------------------
     #OUTPUTS
     #---------------------
@@ -148,7 +248,10 @@ class Monoatomic(Gas):
         
         self._number_particles = (self._gas_mass)/(self._particle_mass_g)
         self._thermal_energy = 1.5*self._number_particles * self._kB * self._temperature
-        self._volume = (2.*self._thermal_energy) / (3.*self._pressure)
+        try:
+            self._volume = (2.*self._thermal_energy) / (3.*self._pressure)
+        except (FloatingPointError,ZeroDivisionError):
+            self._volume = 0.0
 
         #Fugacity = exp(chemical_potential / kT) . It is another way to describe the chemical potential
         self._fugacity = self._pressure * (2.*np.pi*self._particle_mass_g / (self._hP*self._hP) )**(-1.5) * (self._kB*self._temperature)**(-2.5)
@@ -239,7 +342,10 @@ class Diatomic(Gas):
         Zvib = self._Z_vib()
         
         #Now we compute the remaining variables
-        self._volume =  NkT / self._pressure 
+        try:
+            self._volume =  NkT / self._pressure 
+        except (FloatingPointError,ZeroDivisionError):
+            self._volume = 0.0
         #Fugacity = exp(chemical_potential / kT) . It is another way to describe the chemical potential
         self._fugacity = self._pressure * (2.*np.pi*self._particle_mass_g / (self._hP*self._hP) )**(-1.5) * (self._kB*self._temperature)**(-2.5) / (Zrot[0]*Zvib[0])
         #Thermal energy
