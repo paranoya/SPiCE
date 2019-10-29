@@ -44,7 +44,10 @@ class Phase:
         self.mass_history_Msun.append(self.current_mass_Msun()
                                       + self.dm_dt_Msun_Gyr*timestep_Gyr)
 
-
+    def products(self):
+        return {}
+    
+    
 # -----------------------------------------------------------------------------
 class MultiphaseMedium(Phase):
 
