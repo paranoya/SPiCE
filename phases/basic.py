@@ -18,7 +18,8 @@ class Phase:
         self.model = model
         self.params = {**self.default_settings(), **params}
         self.mass_history_Msun = [float(self.params['initial_mass_Msun'])]
-
+        self.products = {}
+        
     def default_settings(self):
         return {
             'initial_mass_Msun': 0.,
@@ -44,10 +45,7 @@ class Phase:
         self.mass_history_Msun.append(self.current_mass_Msun()
                                       + self.dm_dt_Msun_Gyr*timestep_Gyr)
 
-    def products(self):
-        return {}
-    
-    
+        
 # -----------------------------------------------------------------------------
 class MultiphaseMedium(Phase):
 
